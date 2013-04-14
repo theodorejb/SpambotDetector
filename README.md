@@ -10,12 +10,6 @@ Dependencies
 
 * jQuery
 
-Author
-------
-
-Theodore Brown
-www.designedbytheo.com
-
 Usage guide
 -----------
 
@@ -23,29 +17,39 @@ Usage guide
 
 2. Import and initialize the BotDetector class
 
-        <?php
-            require 'files/BotDetector/BotDetector.php';
-            $botDetector = new BotDetector();
-        ?>
+	```php
+	require 'files/BotDetector/BotDetector.php';
+	$botDetector = new BotDetector();
+	```
 
 3. Call the `insertToken()` method after the form you wish to protect
 
-		<form id="myForm" method="post">
-			<input type="text" name="username" />
-			<input type="password" name="password" />
-			<input type="submit" value="Submit" />
-		</form>
-        <?php insertToken('myForm', '/files/BotDetector') ?>
-		
+	```html
+	<form id="myForm" method="post">
+		<input type="text" name="username" />
+		<input type="password" name="password" />
+		<input type="submit" value="Submit" />
+	</form>
+	<?php insertToken('myForm', '/files/BotDetector') ?>
+	```
+
 	This method accepts the form ID and path to the BotDetector folder as parameters.
 
 4. When the form is submitted, call the `validate()` method within a try...catch block
 
-        try {
-			$botDetector->validate();
-			// code to run if the validation passes
-		} catch (Exception $exc) {
-			$errorMessage = $exc->getMessage();
-		}
+	```php
+	try {
+		$botDetector->validate();
+		// code to run if the validation passes
+	} catch (Exception $exc) {
+		$errorMessage = $exc->getMessage();
+	}
+	```
 
-That's it! Feel free to use this code or send a pull request to make changes.
+That's it! Feel free to use this code or fork the repository to make changes.
+
+Author
+------
+
+Theodore Brown
+www.designedbytheo.com
