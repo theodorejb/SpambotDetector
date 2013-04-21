@@ -59,7 +59,7 @@ class BotDetector {
             $.ajax({
                 url: "$pathToBotDetector/BotDetectorAjax.php",
                 type: "POST",
-                dataType: "html",
+                dataType: "text",
                 success: function(data) {
                     var form = document.getElementById('$formId');
                     var keyInputElement = document.createElement('input');
