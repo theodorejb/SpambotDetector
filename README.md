@@ -45,11 +45,3 @@ Usage guide
 		$errorMessage = $exc->getMessage();
 	}
 	```
-
-That's it! Feel free to use this code or fork the repository to make changes.
-
-Author
-------
-
-Theodore Brown
-www.designedbytheo.com
