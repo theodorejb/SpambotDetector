@@ -30,7 +30,7 @@ Usage guide
 		<input type="password" name="password" />
 		<input type="submit" value="Submit" />
 	</form>
-	<?php insertToken('myForm', '/files/BotDetector') ?>
+	<?php $botDetector->insertToken('myForm', '/files/BotDetector') ?>
 	```
 
 	This method accepts the form ID and path to the BotDetector folder as parameters.
