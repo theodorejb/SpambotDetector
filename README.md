@@ -1,7 +1,11 @@
 Spambot Detector
 ================
 
-Prevent form spam without a CAPTCHA with this easy-to-use PHP class. Spambot Detector works by generating a unique token which must be requested via Ajax and inserted into the form prior to submission. Many spambots attempt to post data directly to a page without requesting it first or executing JavaScript, and this class prevents this behavior.
+Prevent form spam without a CAPTCHA with this easy-to-use PHP class. 
+Spambot Detector works by generating a unique token which must be 
+requested via Ajax and inserted into the form prior to submission. 
+Many spambots attempt to post data directly to a page without requesting 
+it first or executing JavaScript, and this class prevents this behavior.
 
 Note: Spambot Detector requires users to have JavaScript enabled.
 
@@ -30,10 +34,10 @@ Usage guide
 		<input type="password" name="password" />
 		<input type="submit" value="Submit" />
 	</form>
-	<?php $botDetector->insertToken('myForm', '/files/BotDetector') ?>
+	<?php $botDetector->insertToken('myForm', '/files/BotDetector/BotDetectorAjax.php') ?>
 	```
 
-	This method accepts the form ID and path to the BotDetector folder as parameters.
+	This method accepts the form ID and relative path to BotDetectorAjax.php as parameters.
 
 4. When the form is submitted, call the `validate()` method within a try...catch block
 
