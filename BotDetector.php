@@ -25,7 +25,7 @@
  *    timestamp in the session, validation will fail.
  *
  * @author Theodore Brown
- * @version 2013.05.27
+ * @version 2013.05.31
  */
 class BotDetector {
 
@@ -33,15 +33,22 @@ class BotDetector {
     private $timestampSessionName = "BotDetectorTime";
     private $loadTimestamp;
     private $secretKey = 'Change this to a secret string of your choosing';
+    private $instance; // used to salt the timestampSessionName in case more than one BotDetector instance is needed on a page
 
-    public function __construct() {
+    public function __construct($instance = NULL) {
 
+        $instanceRegEx = '/^[a-zA-Z\d]+$/';
+        if ($instance != NULL && preg_match($instanceRegEx, $instance)) {
+            $this->instance = $instance;
+            $this->timestampSessionName = $this->timestampSessionName . $this->instance;
+        }
+        
         if (session_id() == '') {
             // no session has been started; try starting it
             if (!session_start())
                 throw new Exception("Unable to start session");
             else
-                session_regenerate_id(TRUE);
+                session_regenerate_id();
         }
 
         // if a session timestamp isn't set, initialize it
@@ -59,12 +66,18 @@ class BotDetector {
      * @param String $pathToAjaxResponseFile A relative path from the form page to BotDetectorAjax.php
      */
     public function insertToken($formId, $pathToAjaxResponseFile) {
+        if (!empty($this->instance))
+            $data = "data: {instance: '$this->instance'},";
+        else
+            $data = '';
+        
         echo <<<_SCRIPT
         <script>
             $.ajax({
                 url: "$pathToAjaxResponseFile",
                 type: "POST",
                 dataType: "text",
+                $data
                 success: function(data) {
                     var form = document.getElementById('$formId');
                     var keyInputElement = document.createElement('input');
