@@ -25,7 +25,7 @@
  *    timestamp in the session, validation will fail.
  *
  * @author Theodore Brown
- * @version 2013.05.31
+ * @version 2013.06.16
  */
 class BotDetector {
 
@@ -42,7 +42,7 @@ class BotDetector {
             $this->instance = $instance;
             $this->timestampSessionName = $this->timestampSessionName . $this->instance;
         }
-        
+
         if (session_id() == '') {
             // no session has been started; try starting it
             if (!session_start())
@@ -67,10 +67,10 @@ class BotDetector {
      */
     public function insertToken($formId, $pathToAjaxResponseFile) {
         if (!empty($this->instance))
-            $data = "data: {instance: '$this->instance'},";
+            $data = "data: {instance: '$this->instance'}";
         else
             $data = '';
-        
+
         echo <<<_SCRIPT
         <script>
             $.ajax({
@@ -78,14 +78,16 @@ class BotDetector {
                 type: "POST",
                 dataType: "text",
                 $data
-                success: function(data) {
-                    var form = document.getElementById('$formId');
-                    var keyInputElement = document.createElement('input');
-                    keyInputElement.setAttribute('type', 'hidden');
-                    keyInputElement.setAttribute('name', '$this->keyInputName');
-                    keyInputElement.setAttribute('value', data);
-                    $(form).append(keyInputElement);
-                }
+            }).done(function(data) {
+                var form = document.getElementById('$formId');
+                var keyInputElement = document.createElement('input');
+                keyInputElement.setAttribute('type', 'hidden');
+                keyInputElement.setAttribute('name', '$this->keyInputName');
+                keyInputElement.setAttribute('value', data);
+                $(form).append(keyInputElement);
+            }).fail(function (jqxhr, textStatus, error) {
+                var err = textStatus + ', ' + error;
+                console.log("Request Failed: " + err);
             });
         </script>
 _SCRIPT;
