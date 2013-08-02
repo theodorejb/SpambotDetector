@@ -10,7 +10,7 @@
  * Updated: 2013-08-02
  *
  * @author Theodore Brown
- * @version 1.0.0
+ * @version 1.0.1
  */
 class SpambotDetect {
 
@@ -24,6 +24,7 @@ class SpambotDetect {
      * @throws Exception if a session doesn't exist and can't be started
      */
     public function __construct($secret) {
+        $this->secretKey = $secret;
 
         // make sure a session has been started
         if (session_id() == '') {
@@ -36,7 +37,7 @@ class SpambotDetect {
         
         // store the secret key in a session variable so that it can be reused
         // on the Ajax response page to generate and return a valid key
-        $_SESSION[SpambotDetect::secretKeySessionName] = $secret;
+        $_SESSION[SpambotDetect::secretKeySessionName] = $this->secretKey;
 
         // if a session timestamp isn't set, initialize it
         if (!isset($_SESSION[$this->timestampSessionName]))
