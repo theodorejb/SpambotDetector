@@ -24,8 +24,11 @@
  * 4. When the form is submitted, if the key is not present or does not match the 
  *    timestamp in the session, validation will fail.
  *
+ * Website: https://github.com/theodorejb/SpambotDetector
+ * Updated: 2013-08-01
+ *
  * @author Theodore Brown
- * @version 2013.06.16
+ * @version 0.9.0
  */
 class BotDetector {
 
