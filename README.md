@@ -52,8 +52,8 @@ How it works
 ------------
 
 1. When the form is requested, the current timestamp is stored in a session variable.
-2. When the key is requested via Ajax, the stored session is used to salt the secret
-   key before it is hashed and returned, making it difficult to guess.
-3. The key hash is inserted key into a hidden input field in the form via JavaScript
-4. When the form is submitted, if the key is not present or does not match the timestamp
-   in the session, validation will fail.
+2. When the token is requested via Ajax, the stored timestamp is used to salt the secret
+   key before it is hashed and returned, making the token unlikely to be guessed.
+3. The token is inserted into a hidden input field in the form via JavaScript
+4. When the form is submitted, if the token is not present or does not match the stored
+   timestamp and secret key, validation will fail.
