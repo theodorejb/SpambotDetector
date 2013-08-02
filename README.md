@@ -15,38 +15,38 @@ Usage guide
 1. Include the SpambotDetect class and initialize it with a secret key of 
    your choosing (preferably something random which can't be easily guessed)
 
-        ```php
-        require 'includes/SpambotDetector/SpambotDetect.php';
-        $botDetect = new SpambotDetect("This is my super awesome secret key!");
-        ```
+   ```php
+   require 'includes/SpambotDetector/SpambotDetect.php';
+   $botDetect = new SpambotDetect("This is my super awesome secret key!");
+   ```
 
 2. Call the `insertToken()` method after the form you wish to protect
 
-        ```html
-        <form id="myForm" method="post">
-            <input type="text" name="username" />
-            <input type="password" name="password" />
-            <input type="submit" value="Submit" />
-        </form>
-        ```
-        ```php
-        <?php $botDetect->insertToken('myForm', '/includes/SpambotDetector/SpambotAjax.php') ?>
-        ```
+   ```html
+   <form id="myForm" method="post">
+      <input type="text" name="username" />
+      <input type="password" name="password" />
+      <input type="submit" value="Submit" />
+   </form>
+   ```
+   ```php
+   <?php $botDetect->insertToken('myForm', '/includes/SpambotDetector/SpambotAjax.php') ?>
+   ```
 
-        This method accepts the form ID and relative path to SpambotAjax.php as parameters.
+   This method accepts the form ID and relative path to SpambotAjax.php as parameters.
 
 3. When the form is submitted, call the `validate()` method within a try...catch block
 
-        ```php
-        try {
-            $botDetect->validate();
-            // code to run if the validation passes
-        } catch (Exception $exc) {
-            // validation failed
-            // display this error message in your form
-            $errorMessage = $exc->getMessage();
-        }
-        ```
+   ```php
+   try {
+      $botDetect->validate();
+      // code to run if the validation passes
+   } catch (Exception $exc) {
+      // validation failed
+      // display this error message in your form
+      $errorMessage = $exc->getMessage();
+   }
+   ```
 
 How it works
 ------------
