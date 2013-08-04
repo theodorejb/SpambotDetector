@@ -10,20 +10,23 @@
  * Updated: 2013-08-04
  *
  * @author Theodore Brown
- * @version 1.0.2
+ * @version 1.1.0
  */
 class SpambotDetect {
 
-    private $loadTimestamp, $secretKey;
+    private $loadTimestamp, $secretKey, $minSubmitDelay;
     private $timestampSessionName = "SpambotDetectTime";
+    private $requestTimeSessionName = "SpambotDetectPageRequestTime";
 
     const secretKeySessionName = "SpambotDetectSecret";
 
     /**
      * @param string $secret A secret string of your choosing which will be salted/hashed to create a valid token
+     * @param integer $minSubmitDelay Optionally specify a minimum delay before the requested form can be submitted (in milliseconds)
+     * 
      * @throws Exception if a session doesn't exist and can't be started
      */
-    public function __construct($secret) {
+    public function __construct($secret, $minSubmitDelay = NULL) {
         $this->secretKey = $secret;
 
         // make sure a session has been started
@@ -33,6 +36,13 @@ class SpambotDetect {
                 throw new Exception("Unable to start session");
             else
                 session_regenerate_id();
+        }
+        
+        // if a minimum submit delay is set, save the page request time in the session
+        if (is_int($minSubmitDelay)) {
+            $this->minSubmitDelay = $minSubmitDelay;
+            if (!isset($_SESSION[$this->requestTimeSessionName]))
+                $_SESSION[$this->requestTimeSessionName] = $_SERVER["REQUEST_TIME_FLOAT"];
         }
 
         // store the secret key in a session variable so that it can be reused
@@ -50,8 +60,8 @@ class SpambotDetect {
     /**
      * Runs an Ajax script to fetch the key and embed it in the form
      * 
-     * @param String $formId the ID of the form to validate
-     * @param String $pathToAjaxResponseFile A relative path from the form page to SpambotAjax.php
+     * @param string $formId The ID of the form to validate
+     * @param string $pathToAjaxResponseFile A relative path from the form page to SpambotAjax.php
      */
     public function insertToken($formId, $pathToAjaxResponseFile) {
         $tokenFieldName = $this->getTokenFieldName();
@@ -128,7 +138,8 @@ _SCRIPT;
     }
 
     /**
-     * Checks for a POSTed token matching the hashed/salted key
+     * Checks for a submitted token matching the hashed/salted key
+     * Also enforce a minimum submit delay if it is set
      * 
      * @return boolean TRUE if valid, otherwise FALSE
      * @throws Exception if the token is not present or invalid
@@ -145,6 +156,21 @@ _SCRIPT;
 
         if (isset($token) && $token === $validKey) {
             // the token is valid!
+            
+            // if a minimum submit delay is set, enforce it
+            if (isset($_SESSION[$this->requestTimeSessionName])) {
+                $minSubmitDelay = $this->minSubmitDelay / 1000;
+                $loadTime = $_SESSION[$this->requestTimeSessionName];
+                $curTime = microtime(TRUE);
+                if ($curTime - $loadTime >= $minSubmitDelay) {
+                    // everything's good
+                    unset($_SESSION[$this->requestTimeSessionName]);
+                } else {
+                    $_SESSION[$this->requestTimeSessionName] = $_SERVER["REQUEST_TIME_FLOAT"]; // reset to the new request time
+                    throw new Exception("Please wait at least " . round($minSubmitDelay, 1) . " seconds before submitting the form");
+                }
+            }
+            
             // unset session values and return true
             unset($_SESSION[$this->timestampSessionName]);
             unset($_SESSION[SpambotDetect::secretKeySessionName]);

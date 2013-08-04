@@ -1,11 +1,20 @@
 Spambot Detector
 ================
 
-Prevent form spam without a CAPTCHA with this easy-to-use PHP class. 
+CAPTCHAs, no matter how simple, put the onus on users to prove they aren't bots.
+This reduces the overall quality of the user experience, and can send a message
+to users that they aren't trusted. Spambot Detector takes a different approach: 
+rather than requiring users to prove their identity, it checks for bot-like behavior
+while remaining invisible to humans.
+
 Spambot Detector works by generating a unique token which must be 
 requested via Ajax and inserted into the form prior to submission. 
 Many spambots attempt to post data directly to a page without requesting 
 it first or executing JavaScript, and this class prevents this behavior.
+
+As of version 1.1, Spambot Detector also allows a minimum submit delay to be 
+specified. This can be used to block form submissions which occur, say, less 
+than 1 second after the page is requested (unrealistic for real users).
 
 Note: Spambot Detector requires users to have JavaScript enabled. However,
 it is possible to use Spambot Detector alongside a CAPTCHA for fallback if
@@ -21,6 +30,13 @@ Usage guide
    require 'includes/SpambotDetector/SpambotDetect.php';
    $botDetect = new SpambotDetect("This is my super awesome secret key!");
    ```
+
+    A minimum submit delay (in milliseconds) can optionally be passed to the constructor:
+
+    ```php
+    // block form submissions which occur less than 2 seconds after the page is requested
+    $botDetect = new SpambotDetect("This is my super awesome secret key!", 2000);
+    ```
 
 2. Call the `insertToken()` method after the form you wish to protect
 
@@ -53,7 +69,7 @@ Usage guide
 How it works
 ------------
 
-1. When the form is requested, the current timestamp is stored in a session variable.
+1. When the page is requested, the secret key and current timestamp are stored in session variables.
 2. When the token is requested via Ajax, the stored timestamp is used to salt the secret
    key before it is hashed and returned, making the token unlikely to be guessed.
 3. The token is inserted into a hidden input field in the form via JavaScript
@@ -94,4 +110,3 @@ you can fall back to a CAPTCHA in the following way (this example uses [Responsi
         // validate using Spambot Detector
     }
     ```
-    
