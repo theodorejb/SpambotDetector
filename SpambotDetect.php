@@ -7,20 +7,20 @@
  * See README for usage instructions and more information about how the library works.
  *
  * Website: https://github.com/theodorejb/SpambotDetector
- * Updated: 2013-08-02
+ * Updated: 2013-08-04
  *
  * @author Theodore Brown
- * @version 1.0.1
+ * @version 1.0.2
  */
 class SpambotDetect {
 
-    private $keyInputName = "SpambotDetectKey";
-    private $timestampSessionName = "SpambotDetectTime";
-    const secretKeySessionName = "SpambotDetectSecret";
     private $loadTimestamp, $secretKey;
+    private $timestampSessionName = "SpambotDetectTime";
+
+    const secretKeySessionName = "SpambotDetectSecret";
 
     /**
-     * @param string $secret A secret string of your choosing which will be used as the base for a salted hash key
+     * @param string $secret A secret string of your choosing which will be salted/hashed to create a valid token
      * @throws Exception if a session doesn't exist and can't be started
      */
     public function __construct($secret) {
@@ -34,7 +34,7 @@ class SpambotDetect {
             else
                 session_regenerate_id();
         }
-        
+
         // store the secret key in a session variable so that it can be reused
         // on the Ajax response page to generate and return a valid key
         $_SESSION[SpambotDetect::secretKeySessionName] = $this->secretKey;
@@ -54,6 +54,7 @@ class SpambotDetect {
      * @param String $pathToAjaxResponseFile A relative path from the form page to SpambotAjax.php
      */
     public function insertToken($formId, $pathToAjaxResponseFile) {
+        $tokenFieldName = $this->getTokenFieldName();
 
         echo <<<_SCRIPT
 <script>
@@ -62,7 +63,7 @@ class SpambotDetect {
         var method = "GET";
         var async = true;
         var formId = "$formId";
-        var keyInputName = "$this->keyInputName";
+        var tokenFieldName = "$tokenFieldName";
 
         try {
             // test for modern browsers first
@@ -92,11 +93,11 @@ class SpambotDetect {
                         if (this.responseText !== null) {
                             // request was successful; insert the response into the form
                             var form = document.getElementById(formId);
-                            var keyInputElement = document.createElement('input');
-                            keyInputElement.setAttribute('type', 'hidden');
-                            keyInputElement.setAttribute('name', keyInputName);
-                            keyInputElement.setAttribute('value', this.responseText);
-                            form.appendChild(keyInputElement);
+                            var tokenInputElement = document.createElement('input');
+                            tokenInputElement.setAttribute('type', 'hidden');
+                            tokenInputElement.setAttribute('name', tokenFieldName);
+                            tokenInputElement.setAttribute('value', this.responseText);
+                            form.appendChild(tokenInputElement);
                         } else {
                             console.log("No Ajax data received");
                         }
@@ -134,13 +135,33 @@ _SCRIPT;
      */
     public function validate() {
         $validKey = $this->getValidKey();
-        if (isset($_REQUEST[$this->keyInputName]) && $_REQUEST[$this->keyInputName] === $validKey) {
-            unset($_SESSION[$this->timestampSessionName]); // delete this if validation passes
+        $TFName = $this->getTokenFieldName();
+
+        if (isset($_GET[$TFName])) {
+            $token = $_GET[$TFName];
+        } elseif (isset($_POST[$TFName])) {
+            $token = $_POST[$TFName];
+        }
+
+        if (isset($token) && $token === $validKey) {
+            // the token is valid!
+            // unset session values and return true
+            unset($_SESSION[$this->timestampSessionName]);
+            unset($_SESSION[SpambotDetect::secretKeySessionName]);
             return TRUE;
         } else {
             throw new Exception("Please enable JavaScript to submit this form");
         }
         return FALSE;
+    }
+
+    /**
+     * To make things harder for bots, the input field name will be randomized by 
+     * setting it to a hash of the secret key appended to itself + the load timestamp.
+     */
+    private function getTokenFieldName() {
+        $secret = $this->secretKey . $this->secretKey;
+        return md5($secret . $this->loadTimestamp);
     }
 
 }
