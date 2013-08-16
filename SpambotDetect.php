@@ -7,10 +7,10 @@
  * See README for usage instructions and more information about how the library works.
  *
  * Website: https://github.com/theodorejb/SpambotDetector
- * Updated: 2013-08-04
+ * Updated: 2013-08-16
  *
  * @author Theodore Brown
- * @version 1.1.0
+ * @version 1.1.1
  */
 class SpambotDetect {
 
@@ -37,24 +37,16 @@ class SpambotDetect {
             else
                 session_regenerate_id();
         }
-        
-        // if a minimum submit delay is set, save the page request time in the session
+
+        // if a minimum submit delay is specified, store it in a property
         if (is_int($minSubmitDelay)) {
             $this->minSubmitDelay = $minSubmitDelay;
-            if (!isset($_SESSION[$this->requestTimeSessionName]))
-                $_SESSION[$this->requestTimeSessionName] = $_SERVER["REQUEST_TIME_FLOAT"];
         }
 
-        // store the secret key in a session variable so that it can be reused
-        // on the Ajax response page to generate and return a valid key
-        $_SESSION[SpambotDetect::secretKeySessionName] = $this->secretKey;
-
-        // if a session timestamp isn't set, initialize it
-        if (!isset($_SESSION[$this->timestampSessionName]))
-            $_SESSION[$this->timestampSessionName] = time();
-
         // store the session timestamp value in a class property
-        $this->loadTimestamp = $_SESSION[$this->timestampSessionName];
+        if (isset($_SESSION[$this->timestampSessionName])) {
+            $this->loadTimestamp = $_SESSION[$this->timestampSessionName];
+        }
     }
 
     /**
@@ -64,6 +56,20 @@ class SpambotDetect {
      * @param string $pathToAjaxResponseFile A relative path from the form page to SpambotAjax.php
      */
     public function insertToken($formId, $pathToAjaxResponseFile) {
+
+        // if a minimum submit delay is set, save the page request time in the session
+        if (!empty($this->minSubmitDelay)) {
+            $_SESSION[$this->requestTimeSessionName] = $_SERVER["REQUEST_TIME_FLOAT"];
+        }
+
+        // store the current timestamp in the session and class
+        $_SESSION[$this->timestampSessionName] = time();
+        $this->loadTimestamp = $_SESSION[$this->timestampSessionName];
+
+        // store the secret key in a session variable so that it can be reused
+        // on the Ajax response page to generate and return a valid key
+        $_SESSION[SpambotDetect::secretKeySessionName] = $this->secretKey;
+
         $tokenFieldName = $this->getTokenFieldName();
 
         echo <<<_SCRIPT
@@ -170,7 +176,7 @@ _SCRIPT;
                     throw new Exception("Please wait at least " . round($minSubmitDelay, 1) . " seconds before submitting the form");
                 }
             }
-            
+
             // unset session values and return true
             unset($_SESSION[$this->timestampSessionName]);
             unset($_SESSION[SpambotDetect::secretKeySessionName]);
