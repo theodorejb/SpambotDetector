@@ -1,5 +1,4 @@
-Spambot Detector
-================
+# Spambot Detector
 
 CAPTCHAs, no matter how simple, put the onus on users to prove they aren't bots.
 This reduces the overall quality of the user experience, and can send a message
@@ -20,8 +19,7 @@ Note: Spambot Detector requires users to have JavaScript enabled. However,
 it is possible to use Spambot Detector alongside a CAPTCHA for fallback if
 JavaScript is not enabled. See [CAPTCHA fallback](#captcha-fallback) for an example.
 
-Usage guide
------------
+## Usage guide
 
 1. Include the SpambotDetect class and initialize it with a secret key of 
    your choosing (preferably something random which can't be easily guessed)
@@ -40,14 +38,12 @@ Usage guide
 
 2. Call the `insertToken()` method after the form you wish to protect
 
-   ```html
+   ```html+php
    <form id="myForm" method="post">
       <input type="text" name="username" />
       <input type="password" name="password" />
       <input type="submit" value="Submit" />
    </form>
-   ```
-   ```php
    <?php $botDetect->insertToken('myForm', '/includes/SpambotDetector/SpambotAjax.php') ?>
    ```
 
@@ -66,8 +62,7 @@ Usage guide
    }
    ```
 
-How it works
-------------
+## How it works
 
 1. When the page is requested, the secret key and current timestamp are stored in session variables.
 2. When the token is requested via Ajax, the stored timestamp is used to salt the secret
@@ -76,8 +71,7 @@ How it works
 4. When the form is submitted, if the token is not present or does not match the stored
    timestamp and secret key, validation will fail.
 
-CAPTCHA fallback
-----------------
+## CAPTCHA fallback
 
 If you'd like to use Spambot Detector, but still support users who have disabled JavaScript,
 you can fall back to a CAPTCHA in the following way (this example uses [Responsive Captcha]
@@ -85,15 +79,15 @@ you can fall back to a CAPTCHA in the following way (this example uses [Responsi
 
 1. Insert the fallback CAPTCHA inside `<noscript>` tags within your form
 
-    ```html
+    ```html+php
    <form id="myForm" method="post">
       <input type="text" name="username" />
       <input type="password" name="password" />
       <noscript>
-        <label for="captcha-field">
-            <?php echo $captcha->getNewQuestion() ?>
+        <label>
+            <?= $captcha->getNewQuestion() ?>
+            <input type="text" name="captcha" />
         </label>
-        <input type="text" name="captcha" id="captcha-field" />
       </noscript>
       <input type="submit" value="Submit" />
    </form>
